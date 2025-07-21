@@ -1,4 +1,4 @@
-from io import BytesIO
+from typing import IO
 from typing import Any
 from collections.abc import Callable
 import struct
@@ -23,15 +23,23 @@ class LRBinaryReader:
 
     Attributes:
         reader (BytesIO): The data to read from
+        position (int): The current read position in the file
     """
 
-    reader: BytesIO
+    reader: IO[bytes]
+    _length: int
 
-    def __init__(self, file: BytesIO):
+    def __init__(self, file: IO[bytes]):
         self.reader = file
 
+        # Calculate the length of the file by seeking to the end
+        current_pos = self.reader.tell()
+        self.reader.seek(0, 2)
+        self._length = self.reader.tell()
+        self.reader.seek(current_pos, 0)
+
     def __len__(self) -> int:
-        return self.reader.getbuffer().nbytes
+        return self._length
 
     @property
     def position(self) -> int:

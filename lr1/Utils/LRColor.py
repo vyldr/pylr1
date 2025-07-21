@@ -10,9 +10,7 @@ class LRColor:
     b: int
     a: int
 
-    def __init__(
-        self, r: int = 0, g: int = 0, b: int = 0, a: int = 255
-    ) -> None:
+    def __init__(self, r: int = 0, g: int = 0, b: int = 0, a: int = 255) -> None:
         self.r = r
         self.g = g
         self.b = b
@@ -33,14 +31,14 @@ class LRColor:
         return (self.r / 255.0, self.g / 255.0, self.b / 255.0, self.a / 255.0)
 
     def __str__(self) -> str:
-        return f'LRColor: {{R:{self.r:>3}, G:{self.g:>3}, B:{self.b:>3}, A:{self.a:>3}}}'
+        return (
+            f'LRColor: {{R:{self.r:>3}, G:{self.g:>3}, B:{self.b:>3}, A:{self.a:>3}}}'
+        )
 
     def hex(self) -> str:
         """Returns the color as a hex string for debug"""
 
-        return '#{:02X}{:02X}{:02X}{:02X}'.format(
-            self.r, self.g, self.b, self.a
-        )
+        return '#{:02X}{:02X}{:02X}{:02X}'.format(self.r, self.g, self.b, self.a)
 
     def __len__(self) -> int:
         return 4

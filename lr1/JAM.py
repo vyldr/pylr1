@@ -1,32 +1,30 @@
+from typing import IO
 from io import BytesIO
 import os
 import struct
 import pathlib
 
+from .IO.LRFile import LRFile
 
-class JamItem:
+
+class JamItem(LRFile):
     """
     A file or directory in the JAM file.
 
     Attributes:
         path (pathlib.Path): The file path within the JAM file
         data (BytesIO): The binary content of the file
-        pointer(int): The index of the first byte of the file
-        size (int): The size of the file in bytes
         is_directory (bool): Whether this is a directory instead of a file
         directory_contents (list[JamItem]): List of contained items, if a directory
         parent (JamItem): The parent directory
         jam (JAM): The containing JAM file
+        pointer(int): The index of the first byte of the file
+        size (int): The size of the file in bytes
     """
 
-    path: pathlib.Path
-    _data: BytesIO | None
     jam: 'JAM'
     pointer: int
     size: int
-    is_directory: bool
-    directory_contents: list['JamItem']
-    parent: 'JamItem'
 
     def __init__(
         self, path: str, jam: 'JAM', pointer: int, size: int, directory: bool = False
@@ -37,14 +35,31 @@ class JamItem:
         self.pointer = pointer
         self.size = size
         self.is_directory = directory
-        self.directory_contents = []
+        self._directory_contents = []
 
     @property
-    def data(self) -> BytesIO:
+    def data(self) -> IO[bytes]:
         if self._data is None:
             self._data = BytesIO(self.jam.data[self.pointer : self.pointer + self.size])
 
         return self._data
+
+    @property
+    def parent(self) -> LRFile:
+        if self._parent is not None:
+            return self._parent
+        else:
+            raise FileNotFoundError(f'Parent directory not assigned for {self.path}')
+
+    @parent.setter
+    def parent(self, parent: LRFile) -> None:
+        self._parent = parent
+
+    def scan_directory(self) -> list[LRFile]:
+        return []
+
+    def get_file(self, path: pathlib.Path) -> LRFile:
+        return self.jam.extract_file(str(path))
 
     def __str__(self) -> str:
         return (
@@ -54,10 +69,6 @@ class JamItem:
             f'{f"Items: {len(self.directory_contents)}" if self.is_directory else f"Size: {self.size}"}'
             f'}}'
         )
-
-    def reset(self) -> None:
-        """Reset the seek position"""
-        self.data.seek(0)
 
 
 class JAM:
@@ -200,7 +211,7 @@ class JAM:
 
         # Make sure this is really a JAM file
         if len(self.data) < 4 or self.data[0:4] != b'LJAM':
-            raise AssertionError('Not a JAM file')
+            raise AssertionError(f'Not a JAM file: {jam_file_path}')
 
         # Recursively create a list of all files
         self.recurse([JamItem(os.sep, self, pointer=4, size=0, directory=True)])

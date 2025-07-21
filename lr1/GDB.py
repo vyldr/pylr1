@@ -3,7 +3,7 @@ from enum import IntEnum
 from .Utils.BinaryFileHelper import BinaryFileHelper
 from .IO.LRBinaryReader import LRBinaryReader
 from .Utils.Token import Token
-from .JAM import JamItem
+from .IO.LRFile import LRFile
 
 from .Utils.GDB_Vertex_Normal import GDB_Vertex_Normal
 from .Utils.GDB_Vertex_Color import GDB_Vertex_Color
@@ -48,7 +48,7 @@ class GDB:
     meta: list[GDB_Meta]
     scale: float
 
-    def __init__(self, file: JamItem) -> None:
+    def __init__(self, file: LRFile) -> None:
         helper: BinaryFileHelper = BinaryFileHelper()
         reader: LRBinaryReader = helper.decompress(file.data)
 

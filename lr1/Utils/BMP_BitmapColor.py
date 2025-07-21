@@ -1,4 +1,4 @@
-from io import BytesIO
+from typing import IO
 
 
 class BitmapColor:
@@ -11,7 +11,7 @@ class BitmapColor:
 
     def __init__(
         self,
-        reader: BytesIO | None = None,
+        reader: IO[bytes] | None = None,
         r: int = 0,
         g: int = 0,
         b: int = 0,

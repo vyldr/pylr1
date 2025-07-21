@@ -1,3 +1,4 @@
+from typing import IO
 from io import BytesIO
 
 from ..IO.LRBinaryReader import LRBinaryReader
@@ -6,7 +7,7 @@ from ..Utils.Token import Token
 
 
 class BinaryFileHelper:
-    def decompress(self, file: BytesIO) -> LRBinaryReader:
+    def decompress(self, file: IO[bytes]) -> LRBinaryReader:
         reader: LRBinaryReader = LRBinaryReader(file)
 
         structs: dict[int, list[int]] = {}

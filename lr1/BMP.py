@@ -1,8 +1,9 @@
+from typing import IO
 from io import BytesIO
 from enum import IntEnum
 import struct
 
-from .JAM import JamItem
+from .IO.LRFile import LRFile
 from .Utils.BMP_BitmapColor import BitmapColor
 
 
@@ -34,7 +35,7 @@ class BMP:
     image: list[BitmapColor]
     palette: list[BitmapColor]
 
-    def __init__(self, file: JamItem | None = None) -> None:
+    def __init__(self, file: LRFile | None = None) -> None:
         if file is None:
             # Create an empty texture
             self.width = 1
@@ -115,7 +116,7 @@ class BMP:
         while len(self.image) < self.width * self.height:
             self.image.append(self.image[0])
 
-    def read_block(self, file: BytesIO) -> bytes:
+    def read_block(self, file: IO[bytes]) -> bytes:
         block_length_decompressed: int = struct.unpack('<h', file.read(2))[0]
         block_length_compressed: int = struct.unpack('<h', file.read(2))[0]
 
@@ -132,7 +133,7 @@ class BMP:
 
         return buffer.getvalue()
 
-    def read_sub_block(self, reader: BytesIO, buffer: BytesIO) -> bool:
+    def read_sub_block(self, reader: IO[bytes], buffer: BytesIO) -> bool:
         block_map: int = reader.read(1)[0]
         for _ in range(8):
             if block_map & 0x80:
@@ -199,3 +200,24 @@ class BMP:
         if x < 0 or y < 0 or x >= self.width or y >= self.height:
             raise IndexError(f'Pixel {x}, {y} out of range')
         return self.image[y * self.width + x]
+
+    def checker_fallback(self: 'BMP | None' = None, square_size: int = 4) -> 'BMP':
+        """Returns a fallback texture with a checkerboard pattern"""
+
+        bmp = BMP()
+        bmp.width = 8
+        bmp.height = 8
+        bmp.palette = [
+            BitmapColor(r=248, g=0, b=248),  # Magenta
+            BitmapColor(r=0, g=0, b=0),  # Black
+        ]
+        bmp.image = []
+
+        for i in range(bmp.width * bmp.height):
+            x = i % bmp.width // square_size
+            y = i // bmp.width // square_size
+            if (x + y) % 2 == 0:
+                bmp.image.append(bmp.palette[0])
+            else:
+                bmp.image.append(bmp.palette[1])
+        return bmp
