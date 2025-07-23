@@ -1,0 +1,18 @@
+schema_version = "1.0.0"
+
+id = "LR_Importer"
+version = "0.1.0"
+name = "Lego Racers File Importer"
+tagline = "Import files from Lego Racers"
+maintainer = "Vyldr"
+type = "add-on"
+
+website = "https://github.com/vyldr/pylr1"
+
+tags = ["Import-Export"]
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
