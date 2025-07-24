@@ -65,10 +65,10 @@ class MDB_Material:
             property_id: int = reader.read_int(Token.Byte)
             match property_id:
                 case PROPERTY.AMBIENT_COLOR:
-                    val.ambient_color = LRColor.read(None, reader)
+                    val.ambient_color = LRColor().read(reader)
 
                 case PROPERTY.DIFFUSE_COLOR:
-                    val.diffuse_color = LRColor.read(None, reader)
+                    val.diffuse_color = LRColor().read(reader)
 
                 case PROPERTY.P_2A:
                     val.bool_2a = True

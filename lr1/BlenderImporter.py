@@ -9,8 +9,10 @@ from .JAM import JAM
 from .BVB import BVB
 from .GDB import GDB
 from .MDB import MDB
+from .TDB import TDB
 from .IO.LRFile import LRFile, LRFileItem
 from .Utils.MDB_Material import MDB_Material
+from .Utils.TDB_Texture import TDB_Texture
 
 
 class BlenderImporter:
@@ -89,13 +91,32 @@ class BlenderImporter:
     def gdb_import(self, gdb: GDB) -> set[str]:
         collection = self.new_collection(self.file.path.name)
 
+        textures_dict: dict[str, TDB_Texture] = dict()
         materials_dict: dict[str, MDB_Material] = dict()
+
+        # Read every TDB file in the same directory
+        for file in self.file.parent.directory_contents:
+            if file.path.suffix == '.TDB':
+                tdb = TDB(file)
+                textures_dict.update(tdb.textures)
 
         # Read every MDB file in the same directory
         for file in self.file.parent.directory_contents:
             if file.path.suffix == '.MDB':
                 mdb = MDB(file)
                 materials_dict.update(mdb.materials)
+
+        # Set texture transparency
+        for key, material in materials_dict.items():
+            if hasattr(material, 'texture'):
+                # Check if there is a matching texture in the TDB
+                if material.texture_name in textures_dict:
+                    texture = textures_dict[material.texture_name]
+                    if texture.trans_color:
+                        color = texture.color.to_tuple()
+                        for bmp_color in material.texture.palette:
+                            if bmp_color.as_float() == color:
+                                bmp_color.a = 0.0  # Set alpha to 0 for transparency
 
         # Generate the images
         for material in materials_dict.values():
@@ -184,6 +205,7 @@ class BlenderImporter:
             tex_image_node.interpolation = 'Closest'
             tex_image_node.location = (-200, 0)
             links.new(tex_image_node.outputs['Color'], overlay_node.inputs['A'])
+            links.new(tex_image_node.outputs['Alpha'], bsdf_node.inputs['Alpha'])
 
             # Apply the UV coordinates
             for poly in mesh.polygons:

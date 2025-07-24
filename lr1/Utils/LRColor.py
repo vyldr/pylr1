@@ -16,12 +16,16 @@ class LRColor:
         self.b = b
         self.a = a
 
-    def read(self: 'LRColor | None', reader: 'LRBinaryReader') -> 'LRColor':
+    def read(
+        self: 'LRColor', reader: 'LRBinaryReader', alpha: bool = True
+    ) -> 'LRColor':
         val: LRColor = LRColor()
         val.r = reader.read_typed_int()
         val.g = reader.read_typed_int()
         val.b = reader.read_typed_int()
-        val.a = reader.read_typed_int()
+
+        if alpha:
+            val.a = reader.read_typed_int()
 
         return val
 
