@@ -172,6 +172,9 @@ class BlenderImporter:
         for node in nodes:
             nodes.remove(node)
 
+        # Backface culling
+        material.use_backface_culling = True
+
         # Material Output node
         output_node = nodes.new(type='ShaderNodeOutputMaterial')
         output_node.location = (600, 0)
