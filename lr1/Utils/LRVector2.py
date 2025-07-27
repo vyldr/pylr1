@@ -13,7 +13,7 @@ class LRVector2:
         self.x = x
         self.y = y
 
-    def read(self: 'LRVector2 | None', reader: 'LRBinaryReader') -> 'LRVector2':
+    def read(self, reader: 'LRBinaryReader') -> 'LRVector2':
         val: LRVector2 = LRVector2()
         val.x = reader.read_float(True)
         val.y = reader.read_float(True)

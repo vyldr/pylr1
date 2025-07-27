@@ -4,15 +4,19 @@ from enum import IntEnum
 
 import bpy
 import colorsys
+from mathutils import Vector, Quaternion
 
 from .JAM import JAM
 from .BVB import BVB
 from .GDB import GDB
 from .MDB import MDB
 from .TDB import TDB
+from .RRB import RRB
+
 from .IO.LRFile import LRFile, LRFileItem
 from .Utils.MDB_Material import MDB_Material
 from .Utils.TDB_Texture import TDB_Texture
+from .Utils.LRVector3 import LRVector3
 
 
 class BlenderImporter:
@@ -40,6 +44,9 @@ class BlenderImporter:
 
             case '.GDB':
                 self.gdb_import(GDB(self.file))
+
+            case '.RRB':
+                self.rrb_import(RRB(self.file))
 
             case _:
                 pass
@@ -250,3 +257,62 @@ class BlenderImporter:
         links.new(vc_node.outputs['Color'], overlay_node.inputs['B'])
 
         return material
+
+    def rrb_import(self, rrb: RRB, show_nodes: bool = False) -> set[str]:
+        name: str = self.file.path.name
+
+        # Create a collection to hold everything
+        parent_collection = self.new_collection(name)
+
+        # Create another collection for all the nodes (optional)
+        if show_nodes:
+            node_collection = bpy.data.collections.new('RRB Nodes')
+            parent_collection.children.link(node_collection)
+
+        position: LRVector3 = LRVector3(
+            rrb.start_position.x, rrb.start_position.y, rrb.start_position.z
+        )
+        positions = []
+        rotations = []
+
+        # Create a mesh for the time and orientation of each node
+        for i, node in enumerate(rrb.nodes):
+            # Convert deltas to positions
+            position += node.position
+            positions.append(Vector(position))
+
+            quat = Quaternion(node.rotation)
+            quat.normalize()
+            rotations.append(quat)
+
+            if show_nodes:
+                length = node.timing * 0.1
+
+                # Create a mesh with two points and one edge
+                mesh = bpy.data.meshes.new(name + '_Mesh')
+                mesh.from_pydata([(0, 0, 0), (-length, 0, 0)], [(0, 1)], [])
+                mesh.update()
+                obj = bpy.data.objects.new(f'node_{i}', mesh)
+
+                # Set the position and rotation
+                obj.location = position.to_tuple()
+                obj.rotation_mode = 'QUATERNION'
+                obj.rotation_quaternion = quat
+
+                node_collection.objects.link(obj)
+
+        # Create a curve object
+        curve_data = bpy.data.curves.new(name=name, type='CURVE')
+        curve_data.dimensions = '3D'
+        curve_data.resolution_u = 2
+
+        polyline = curve_data.splines.new('POLY')
+        polyline.points.add(len(positions) - 1)
+
+        for i, coord in enumerate(positions):
+            polyline.points[i].co = (coord.x, coord.y, coord.z, 1)
+
+        curve_obj = bpy.data.objects.new(name, curve_data)
+        parent_collection.objects.link(curve_obj)
+
+        return {'FINISHED'}

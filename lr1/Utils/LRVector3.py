@@ -15,7 +15,7 @@ class LRVector3:
         self.y = y
         self.z = z
 
-    def read(self: 'LRVector3 | None', reader: 'LRBinaryReader') -> 'LRVector3':
+    def read(self, reader: 'LRBinaryReader') -> 'LRVector3':
         """Reads the vector components from a file"""
         val: LRVector3 = LRVector3()
         val.x = reader.read_float(True)
@@ -35,10 +35,7 @@ class LRVector3:
         self.z = self.z / length
 
     def __add__(self, v: 'LRVector3') -> 'LRVector3':
-        self.x += v.x
-        self.y += v.y
-        self.z += v.z
-        return self
+        return LRVector3(self.x + v.x, self.y + v.y, self.z + v.z)
 
     def scale(
         self, x: float = 1, y: float | None = None, z: float | None = None

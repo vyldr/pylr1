@@ -1,15 +1,5 @@
 # type: ignore
 
-bl_info: dict[str, str | tuple[int, int, int]] = {
-    'name': 'LR File Importer',
-    'author': 'Vyldr',
-    'version': (0, 1, 0),
-    'blender': (4, 2, 0),
-    'location': 'File > Import',
-    'description': 'Import Lego Racers files',
-    'category': 'Import-Export',
-}
-
 
 try:
     from pathlib import Path
@@ -29,15 +19,15 @@ else:
     class IMPORT_OT_LRFile(Operator, ImportHelper):
         bl_idname = 'import_scene.import_lrfiles'
         bl_label = 'Import Lego Racers Files'
-        bl_description = 'Import Lego Racers files (.gdb, .bvb)'
+        bl_description = 'Import Lego Racers files (.gdb, .bvb, .rrb)'
         bl_options = {'PRESET', 'UNDO'}
-        filename_ext = '.gdb;.bvb'
-        filter_glob: StringProperty(default='*.gdb;*.bvb', options={'HIDDEN'})
+        filename_ext = '.gdb;.bvb;.rrb'
+        filter_glob: StringProperty(default='*.gdb;*.bvb;*.rrb', options={'HIDDEN'})
 
         def execute(self, context):
             filepath = Path(self.filepath)
             ext = filepath.suffix.upper()
-            if ext not in {'.GDB', '.BVB'}:
+            if ext not in {'.GDB', '.BVB', '.RRB'}:
                 self.report({'ERROR'}, f'Unsupported file extension: {ext}')
                 return {'CANCELLED'}
 
@@ -46,7 +36,7 @@ else:
 
     def menu_func_import(self, context) -> None:
         self.layout.operator(
-            IMPORT_OT_LRFile.bl_idname, text='Lego Racers Files (.gdb/.bvb)'
+            IMPORT_OT_LRFile.bl_idname, text='Lego Racers Files (.gdb/.bvb/.rrb)'
         )
 
     def register() -> None:

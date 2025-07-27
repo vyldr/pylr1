@@ -21,7 +21,7 @@ class GDB_Vertex_Normal:
 
     def read(self, reader: LRBinaryReader) -> 'GDB_Vertex_Normal':
         val: GDB_Vertex_Normal = GDB_Vertex_Normal()
-        val.position = LRVector3.read(None, reader)
-        val.tex_coords = LRVector2.read(None, reader)
-        val.normal = LRVector3.read(None, reader)
+        val.position = LRVector3().read(reader)
+        val.tex_coords = LRVector2().read(reader)
+        val.normal = LRVector3().read(reader)
         return val

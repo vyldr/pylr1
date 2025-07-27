@@ -2,6 +2,7 @@
 This is a Blender add-on for importing Lego Racers files.  Currently supported file types include:
 - `.GDB` 3D objects (not all gdb files work yet)
 - `.BVB` Bounding volumes and checkpoints
+- `.RRB` Paths for opponent racers
 
 ## Installation
 1. Download the latest release from the [releases page](https://github.com/vyldr/pylr1/releases) or build it yourself

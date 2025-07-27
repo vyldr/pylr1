@@ -24,8 +24,8 @@ class GDB_Vertex_Color:
 
     def read(self, reader: LRBinaryReader) -> 'GDB_Vertex_Color':
         val: GDB_Vertex_Color = GDB_Vertex_Color()
-        val.position = LRVector3.read(None, reader)
-        val.tex_coords = LRVector2.read(None, reader)
+        val.position = LRVector3().read(reader)
+        val.tex_coords = LRVector2().read(reader)
         val.color = LRColor().read(reader)
 
         val.tex_coords.y = val.tex_coords.y
