@@ -26,7 +26,7 @@ class PROPERTY(IntEnum):
 
 class MDB_Material:
     ambient_color: LRColor | None
-    diffuse_color: LRColor | None
+    diffuse_color: LRColor
     bool_2a: bool
     bool_2b: bool
     texture_name: str
@@ -44,7 +44,7 @@ class MDB_Material:
 
     def __init__(self) -> None:
         self.ambient_color = None
-        self.diffuse_color = None
+        self.diffuse_color = LRColor()
         self.bool_2a = False
         self.bool_2b = False
         self.texture_name = ''
@@ -134,5 +134,5 @@ class MDB_Material:
             f'{self.bool_str(self.bool_4a)}  '
             f'Alpha: {str(self.alpha):<3}  '
             f'Ambient: {(self.ambient_color.hex() if self.ambient_color is not None else ""):<9}  '
-            f'Diffuse: {(self.diffuse_color.hex() if self.diffuse_color is not None else ""):<9}'
+            f'Diffuse: {(self.diffuse_color.hex()):<9}'
         )

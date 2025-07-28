@@ -1,4 +1,4 @@
-from ..Utils.GDB_Vertex_Color import GDB_Vertex_Color
+from ..Utils.GDB_Vertex import GDB_Vertex
 from ..Utils.GDB_Polygon import GDB_Polygon
 from ..Utils.GDB_Meta import GDB_Meta_Faces, GDB_Meta_Vertices, GDB_Meta_Bone
 
@@ -13,8 +13,9 @@ class GDB_Object:
         bone (int): Bone ID associated with this object.
     """
 
-    vertices: list[GDB_Vertex_Color]
+    vertices: list[GDB_Vertex]
     polygons: list[GDB_Polygon]
+    vertex_format: str
     material_id: int
     bone: int
 
@@ -24,8 +25,9 @@ class GDB_Object:
 
     def __init__(
         self,
-        vertices: list[GDB_Vertex_Color] | None = None,
+        vertices: list[GDB_Vertex] | None = None,
         polygons: list[GDB_Polygon] | None = None,
+        vertex_format: str = 'color',
         material_id: int = 0,
         meta_vertices: GDB_Meta_Vertices = GDB_Meta_Vertices(),
         meta_indices: GDB_Meta_Faces = GDB_Meta_Faces(),
@@ -33,6 +35,7 @@ class GDB_Object:
     ) -> None:
         self.vertices = vertices if vertices is not None else []
         self.polygons = polygons if polygons is not None else []
+        self.vertex_format = vertex_format
         self.material_id = material_id
         self.meta_vertices = meta_vertices
         self.meta_indices = meta_indices

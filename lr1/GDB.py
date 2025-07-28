@@ -7,6 +7,7 @@ from .IO.LRFile import LRFile
 
 from .Utils.GDB_Vertex_Normal import GDB_Vertex_Normal
 from .Utils.GDB_Vertex_Color import GDB_Vertex_Color
+from .Utils.GDB_Vertex import GDB_Vertex
 from .Utils.GDB_Polygon import GDB_Polygon
 from .Utils.GDB_Meta import (
     GDB_Meta,
@@ -40,8 +41,7 @@ class GDB:
     """
 
     materials: list[str]
-    vertex_normals: list[GDB_Vertex_Normal]
-    vertices: list[GDB_Vertex_Color]
+    vertices: list[GDB_Vertex]
     vertex_format: str
     polygons: list[GDB_Polygon]
     objects: list[GDB_Object]
@@ -54,7 +54,7 @@ class GDB:
 
         self.materials = []
         self.vertices = []
-        self.vertex_format = 'color'
+        self.vertex_format = ''
         self.polygons = []
         self.meta = []
         self.objects = []
@@ -73,11 +73,11 @@ class GDB:
                     self.scale = reader.read_float(True)
 
                 case ID.VERTEX_NORMALED:
-                    self.vertex_normals = reader.read_array_block(
-                        GDB_Vertex_Normal.read
-                    )
+                    self.vertex_format = 'normal'
+                    self.vertices = reader.read_array_block(GDB_Vertex_Normal.read)
 
                 case ID.VERTEX_COLORED:
+                    self.vertex_format = 'color'
                     self.vertices = reader.read_array_block(GDB_Vertex_Color.read)
 
                 case ID.INDICES:
@@ -113,7 +113,7 @@ class GDB:
         for i in range(3):
             if relative_indices[i] < vertex_selector[0]:
                 if previous_vertex_selector[0] > relative_indices[i]:
-                    assert False
+                    pass
 
                 obj_index[i] = previous_vertex_selector_obj_offset + (
                     relative_indices[i] - previous_vertex_selector[0]
@@ -170,8 +170,6 @@ class GDB:
                 previous_vertex_selector_obj_offset,
             )
 
-            assert self.vertex_format == 'color'  # TODO: support other formats
-
             # Add a triangle
             object.polygons.append(
                 GDB_Polygon(
@@ -190,7 +188,7 @@ class GDB:
         current_face_selector: list[int] = [0, 0]
 
         has_object: bool = False
-        current_object: GDB_Object = GDB_Object()
+        current_object: GDB_Object = GDB_Object(vertex_format=self.vertex_format)
         current_group: int = -1
 
         for meta in self.meta:
@@ -203,7 +201,9 @@ class GDB:
                     self.objects.append(current_object)
 
                 if meta.material_id >= 0 and meta.material_id <= len(self.materials):
-                    current_object = GDB_Object(material_id=meta.material_id)
+                    current_object = GDB_Object(
+                        vertex_format=self.vertex_format, material_id=meta.material_id
+                    )
                     has_object = True
                 else:
                     raise IndexError(f'material_id: {meta.material_id} out of range')

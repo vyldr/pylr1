@@ -156,11 +156,17 @@ class BlenderImporter:
             mesh.update()
 
             # Create the material
+            if gdb.materials[object.material_id] in materials_dict:
+                mdb_material: MDB_Material = materials_dict[
+                    gdb.materials[object.material_id]
+                ]
+            else:
+                mdb_material = MDB_Material()
             mat = self.generate_material(
                 object,
                 mesh,
                 f'{gdb.materials[object.material_id]} obj_{i}',
-                materials_dict[gdb.materials[object.material_id]],
+                mdb_material,
             )
 
             # Assign material
@@ -238,23 +244,24 @@ class BlenderImporter:
             tex_coord_node.location = (-600, -100)
             links.new(tex_coord_node.outputs['UV'], map_node.inputs['Vector'])
 
-        # Create vertex color layer
-        color_layer = mesh.vertex_colors.new(name='Color')
+        if object.vertex_format == 'color':
+            # Create vertex color layer
+            color_layer = mesh.vertex_colors.new(name='Color')
 
-        # Assign colors per face corner (loop)
-        loop_colors = color_layer.data
-        for poly in mesh.polygons:
-            for loop_idx in poly.loop_indices:
-                vert_idx = mesh.loops[loop_idx].vertex_index
-                loop_colors[loop_idx].color = object.vertices[
-                    vert_idx
-                ].color.to_tuple()  # RGBA
+            # Assign colors per face corner (loop)
+            loop_colors = color_layer.data
+            for poly in mesh.polygons:
+                for loop_idx in poly.loop_indices:
+                    vert_idx = mesh.loops[loop_idx].vertex_index
+                    loop_colors[loop_idx].color = object.vertices[
+                        vert_idx
+                    ].color.to_tuple()  # RGBA
 
-        # Color Attribute node
-        vc_node = nodes.new(type='ShaderNodeVertexColor')
-        vc_node.location = (-100, -300)
-        vc_node.layer_name = color_layer.name
-        links.new(vc_node.outputs['Color'], overlay_node.inputs['B'])
+            # Color Attribute node
+            vc_node = nodes.new(type='ShaderNodeVertexColor')
+            vc_node.location = (-100, -300)
+            vc_node.layer_name = color_layer.name
+            links.new(vc_node.outputs['Color'], overlay_node.inputs['B'])
 
         return material
 

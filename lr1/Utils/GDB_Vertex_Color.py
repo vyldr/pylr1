@@ -5,9 +5,10 @@ from ..IO.LRBinaryReader import LRBinaryReader
 from ..Utils.LRVector3 import LRVector3
 from ..Utils.LRVector2 import LRVector2
 from ..Utils.LRColor import LRColor
+from ..Utils.GDB_Vertex import GDB_Vertex
 
 
-class GDB_Vertex_Color:
+class GDB_Vertex_Color(GDB_Vertex):
     position: LRVector3
     tex_coords: LRVector2
     color: LRColor
@@ -22,13 +23,11 @@ class GDB_Vertex_Color:
         self.tex_coords = tex_coords
         self.color = color
 
-    def read(self, reader: LRBinaryReader) -> 'GDB_Vertex_Color':
+    def read(self, reader: LRBinaryReader) -> 'GDB_Vertex':
         val: GDB_Vertex_Color = GDB_Vertex_Color()
         val.position = LRVector3().read(reader)
         val.tex_coords = LRVector2().read(reader)
         val.color = LRColor().read(reader)
-
-        val.tex_coords.y = val.tex_coords.y
         return val
 
     def __iter__(self) -> Iterator[float]:
